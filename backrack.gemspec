@@ -17,4 +17,5 @@ Gem::Specification.new do |gem|
   
   gem.add_dependency('rake', '>= 0.8.7')
   gem.add_dependency('thor', '~> 0.14.6')
+  gem.add_dependency('bundler', '~> 1.1')
 end
