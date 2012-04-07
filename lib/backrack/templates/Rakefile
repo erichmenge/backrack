@@ -1,0 +1,50 @@
+require 'rubygems'
+require 'bundler'
+require 'pathname'
+require 'fileutils'
+
+Bundler.require
+include FileUtils
+
+ROOT        = Pathname(File.dirname(__FILE__))
+BUILD_DIR   = ROOT.join("build")
+PUBLIC_DIR  = ROOT.join("public")
+PACKAGE_DIR = ROOT.join("package")
+SOURCE_DIR  = ROOT.join("src")
+ASSETS      = %w{application.js application.css}
+
+desc 'Package the application'
+task :package => :compile do
+  rm_r PACKAGE_DIR
+  Dir.mkdir PACKAGE_DIR if !File.exist?('package')
+  Dir.mkdir PACKAGE_DIR.join('lib') if !File.exist? PACKAGE_DIR.join('lib')
+  cp_r "#{BUILD_DIR}/.", PACKAGE_DIR.join('lib')
+  cp_r SOURCE_DIR.join('images'), PACKAGE_DIR.join('lib')
+  cp PUBLIC_DIR.join('index.html'), PACKAGE_DIR
+  `git describe --tags --always > #{PACKAGE_DIR.join('VERSION')}`
+end
+
+desc 'Compile assets to build directory'
+task :compile => :cleanup do
+  time_start = Time.now
+  Dir.mkdir 'build' if !File.exist?('build')
+  sprockets = Sprockets::Environment.new
+  sprockets.css_compressor = YUI::CssCompressor.new
+  sprockets.js_compressor  = Uglifier.new
+  sprockets.append_path(SOURCE_DIR.join('javascripts').to_s)
+  sprockets.append_path(SOURCE_DIR.join('stylesheets').to_s)
+  ASSETS.each do |asset_name|
+    puts "Compiling #{asset_name}"
+    asset = sprockets[asset_name]
+    prefix, basename = asset.pathname.to_s.split('/')[-2..-1]
+    asset.write_to BUILD_DIR.join(basename)
+  end
+  time_end = Time.now
+  puts "Assets compiled in #{(time_end - time_start).to_i} seconds"
+end
+
+desc 'Clean up build directory'
+task :cleanup do
+  puts "Cleaning up build directory..."
+  FileUtils.rm_r(BUILD_DIR.join('*'), force: true)
+end

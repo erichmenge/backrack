@@ -1,0 +1,7 @@
+<div class="content">
+	<%- if @body -%>
+		<%= @body %>
+	<%- else -%>
+		This is the <%= @name %> template.
+	<%- end -%>
+</div>
