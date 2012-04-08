@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "backrack"
   gem.require_paths = ["lib"]
-  gem.version       = Backrack::VERSION
+  gem.version       = BackRack::VERSION
   
   gem.add_dependency('rake', '>= 0.8.7')
   gem.add_dependency('thor', '~> 0.14.6')
