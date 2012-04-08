@@ -15,19 +15,18 @@ ASSETS      = %w{application.js application.css}
 
 desc 'Package the application'
 task :package => :compile do
-  rm_r PACKAGE_DIR
-  Dir.mkdir PACKAGE_DIR if !File.exist?('package')
-  Dir.mkdir PACKAGE_DIR.join('lib') if !File.exist? PACKAGE_DIR.join('lib')
+  Dir.mkdir PACKAGE_DIR if !File.exists?(PACKAGE_DIR)
+  Dir.mkdir PACKAGE_DIR.join('lib') if !File.exists?(PACKAGE_DIR.join('lib'))
   cp_r "#{BUILD_DIR}/.", PACKAGE_DIR.join('lib')
-  cp_r SOURCE_DIR.join('images'), PACKAGE_DIR.join('lib')
+  cp_r SOURCE_DIR.join('images'), PACKAGE_DIR.join('lib') if File.exists?(SOURCE_DIR.join('images'))
   cp PUBLIC_DIR.join('index.html'), PACKAGE_DIR
-  `git describe --tags --always > #{PACKAGE_DIR.join('VERSION')}`
+  `git describe --tags --always > #{PACKAGE_DIR.join('VERSION')}` if File.exists?(ROOT.join('.git'))
 end
 
 desc 'Compile assets to build directory'
 task :compile => :cleanup do
   time_start = Time.now
-  Dir.mkdir 'build' if !File.exist?('build')
+  Dir.mkdir BUILD_DIR if !File.exists?(BUILD_DIR)
   sprockets = Sprockets::Environment.new
   sprockets.css_compressor = YUI::CssCompressor.new
   sprockets.js_compressor  = Uglifier.new
@@ -43,8 +42,10 @@ task :compile => :cleanup do
   puts "Assets compiled in #{(time_end - time_start).to_i} seconds"
 end
 
-desc 'Clean up build directory'
+desc 'Clean up build and package directories'
 task :cleanup do
   puts "Cleaning up build directory..."
   FileUtils.rm_r(BUILD_DIR.join('*'), force: true)
+  puts "Cleaning up package directory..."
+  FileUtils.rm_r(PACKAGE_DIR.join('*'), force: true) if File.exists?(PACKAGE_DIR)
 end
