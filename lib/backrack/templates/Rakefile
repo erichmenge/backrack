@@ -45,7 +45,7 @@ end
 desc 'Clean up build and package directories'
 task :cleanup do
   puts "Cleaning up build directory..."
-  FileUtils.rm_r(BUILD_DIR.join('*'), force: true)
+  FileUtils.rm_r("#{BUILD_DIR}/.", force: true)
   puts "Cleaning up package directory..."
-  FileUtils.rm_r(PACKAGE_DIR.join('*'), force: true) if File.exists?(PACKAGE_DIR)
+  FileUtils.rm_r("#{PACKAGE_DIR}/.", force: true) if File.exists?(PACKAGE_DIR)
 end
